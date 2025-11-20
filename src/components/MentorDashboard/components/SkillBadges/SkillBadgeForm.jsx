@@ -31,6 +31,7 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
     const [filteredStudents, setFilteredStudents] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [loadingStudents, setLoadingStudents] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
 
     const toggleSidebar = () => {
         setIsOpen((prev) => !prev);
@@ -84,6 +85,7 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
     const handleStudentNameChange = (e) => {
         const value = e.target.value;
         setFormData(prev => ({ ...prev, student_name: value }));
+        setIsTyping(true);
         
         if (value.trim().length > 0) {
             const filtered = students.filter(student => 
@@ -98,9 +100,12 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
     };
 
     // Select a student from suggestions
-    const selectStudent = (studentName) => {
+    const selectStudent = (studentName, e) => {
+        e.stopPropagation();
         setFormData(prev => ({ ...prev, student_name: studentName }));
+        setFilteredStudents([]);
         setShowSuggestions(false);
+        setIsTyping(false);
     };
     
     // Merged handleSubmit logic (using full error handling and token from HEAD)
@@ -225,7 +230,7 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
                                                 {filteredStudents.map((student) => (
                                                     <div
                                                         key={student.id}
-                                                        onClick={() => selectStudent(student.full_name)}
+                                                        onClick={(e) => selectStudent(student.full_name, e)}
                                                         className="p-2 hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer border-b dark:border-gray-600 last:border-b-0"
                                                     >
                                                         <div className="font-medium text-gray-900 dark:text-white">{student.full_name}</div>
@@ -236,7 +241,7 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
                                         )}
                                         
                                         {/* Show when no students match */}
-                                        {showSuggestions && formData.student_name && filteredStudents.length === 0 && (
+                                        {showSuggestions && isTyping && formData.student_name && filteredStudents.length === 0 && students.length > 0 && (
                                             <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg p-3">
                                                 <p className="text-sm text-red-600 dark:text-red-400">⚠️ No students found with that name</p>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Make sure the student is registered in the system</p>
@@ -254,7 +259,7 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
 
                                 {/* Badge Description Textarea */}
                                 <label className="block dark:text-white">
-                                    Badge Description (Optional context):
+                                    Badge Description <span className="text-red-500">*</span>
                                     <textarea
                                         name="badge_description"
                                         placeholder="Brief reason for the award (e.g., Completed the MERN stack project with high code quality)"
