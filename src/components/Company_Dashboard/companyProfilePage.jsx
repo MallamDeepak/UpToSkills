@@ -77,20 +77,20 @@ const CompanyProfilePage = ({ isDarkMode, toggleDarkMode }) => {
         />
 
         {/* Main Scrollable Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide pt-20 p-6 bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
-          {/* Back Button */}
-          <motion.button
-            onClick={() => navigate("/company")}
-            className="flex items-center gap-2 my-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-            whileHover={{ scale: 1.05, x: -3 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back To Company Dashboard</span>
-          </motion.button>
-
+        <div className="flex-1 overflow-y-auto scrollbar-hide pt-20 p-6 bg-gray-50 dark:bg-gray-950 transition-colors duration-300 flex items-center justify-center">
           {/* Profile Data Section */}
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl w-full">
+            {/* Back Button */}
+            <motion.button
+              onClick={() => navigate("/company")}
+              className="flex items-center gap-2 mx-auto mb-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 w-fit"
+              whileHover={{ scale: 1.05, x: -3 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back To Company Dashboard</span>
+            </motion.button>
+
             {loading ? (
               <p className="text-gray-600 dark:text-gray-400 m-6">Loading...</p>
             ) : error ? (
@@ -139,6 +139,13 @@ const CompanyProfilePage = ({ isDarkMode, toggleDarkMode }) => {
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                          {/* Username displayed above company name */}
+                          <Info
+                            label="Username :- "
+                            value={companyData.username}
+                            defaultText="N/A"
+                            isLink={false}
+                          />
                           <Info
                             label="Company Name :- "
                             value={
@@ -186,11 +193,11 @@ const CompanyProfilePage = ({ isDarkMode, toggleDarkMode }) => {
                 </div>
               </div>
             ) : null}
-          </div>
 
-          {/* ✅ Non-Sticky Footer */}
-          <div className="mt-8">
-            <Footer />
+            {/* ✅ Non-Sticky Footer */}
+            <div className="mt-8">
+              <Footer />
+            </div>
           </div>
         </div>
       </div>

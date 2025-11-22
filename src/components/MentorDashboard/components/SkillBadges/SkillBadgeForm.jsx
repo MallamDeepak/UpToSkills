@@ -283,17 +283,19 @@ const SkillBadgeForm = ({ isDarkMode, setIsDarkMode }) => {
                                 </label>
 
                                 {/* Submit Button and Status Messages */}
-                                <button
-                                    type="submit"
-                                    disabled={submissionStatus === 'submitting'}
-                                    className={`px-4 py-2 text-white rounded-md transition ${
-                                        submissionStatus === 'submitting'
-                                            ? 'bg-gray-500 cursor-not-allowed'
-                                            : 'bg-blue-600 hover:bg-blue-700'
-                                    }`}
-                                >
-                                    {submissionStatus === 'submitting' ? 'Submitting...' : 'Award Badge'}
-                                </button>
+                                <div className="flex justify-center mt-6">
+                                    <button
+                                        type="submit"
+                                        disabled={submissionStatus === 'submitting'}
+                                        className={`px-4 py-2 text-white rounded-md transition ${
+                                            submissionStatus === 'submitting'
+                                                ? 'bg-gray-500 cursor-not-allowed'
+                                                : 'bg-blue-600 hover:bg-blue-700'
+                                        }`}
+                                    >
+                                        {submissionStatus === 'submitting' ? 'Submitting...' : 'Award Badge'}
+                                    </button>
+                                </div>
                                 
                                 {/* Submission Status Messages */}
                                 {submissionStatus === 'success' && (
