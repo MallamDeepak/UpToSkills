@@ -79,6 +79,32 @@ const createProgram = async (req, res) => {
         const enrollment = await createEnrollment(studentId, courseId, 'active');
         console.log('✅ ENROLLMENT CREATED SUCCESSFULLY:', enrollment);
 
+        // Send enrollment notification to student
+        try {
+          const { pushNotification } = require('../utils/notificationService');
+          const io = req.app.get('io');
+          
+          await pushNotification({
+            role: 'student',
+            recipientRole: 'student',
+            recipientId: studentId,
+            type: 'enrollment',
+            title: 'Successfully Enrolled!',
+            message: `You have been enrolled in ${courseResult.rows[0].title}. Check your courses to get started!`,
+            link: '/dashboard/courses',
+            metadata: {
+              courseId: courseId,
+              courseName: courseResult.rows[0].title,
+              enrollmentDate: new Date().toISOString()
+            },
+            io
+          });
+          console.log('✅ Enrollment notification sent to student:', studentId);
+        } catch (notificationError) {
+          console.error('❌ Failed to send enrollment notification:', notificationError);
+          // Don't fail the enrollment if notification fails
+        }
+
         res.json({ 
           success: true, 
           data: result.rows[0],

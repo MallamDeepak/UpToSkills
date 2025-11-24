@@ -8,7 +8,9 @@ const {
   getStudentById,
   searchStudents,
   searchStudentsByQuery,
-  getStudentDetails
+  getStudentDetails,
+  deactivateStudent,
+  reactivateStudent
 } = require('../controllers/students.controller');
 
 // Route: get student count (keeps your existing count route)
@@ -65,6 +67,12 @@ router.get('/all-students', getStudents);
 
 // Keep root route (getStudents) at /api/students/
 router.get('/', getStudents);
+
+// Deactivate student by ID
+router.patch('/:id/deactivate', deactivateStudent);
+
+// Reactivate student by ID
+router.patch('/:id/reactivate', reactivateStudent);
 
 // Get complete student details with all activities
 router.get('/:id/details', getStudentDetails);

@@ -109,7 +109,7 @@ const Cybersecurity = () => {
                     htmlFor="name"
                     className="absolute text-sm text-gray-500 left-4 top-3.5 peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600 transition-all"
                   >
-                    Full Name
+                    Username
                   </label>
                 </div>
 

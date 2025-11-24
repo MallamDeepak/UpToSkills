@@ -175,6 +175,15 @@ router.post('/login', async (req, res) => {
     }
 
     const user = userResult.rows[0];
+    
+    // Check if student account is deactivated
+    if (normalizedRole === 'student' && user.is_active === false) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Your account has been deactivated. Please contact support for assistance.' 
+      });
+    }
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid credentials' });

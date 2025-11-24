@@ -11,6 +11,7 @@ const Students = ({ isDarkMode }) => {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
+  const [isDeactivating, setIsDeactivating] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentDetails, setStudentDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -53,6 +54,37 @@ const Students = ({ isDarkMode }) => {
       alert("Error deleting student");
     } finally {
       setIsDeleting(null);
+    }
+  };
+
+  const handleToggleActivation = async (id, currentlyActive) => {
+    const student = students.find((s) => s.id === id);
+    const studentName = student?.full_name || `ID ${id}`;
+    const action = currentlyActive ? "deactivate" : "reactivate";
+    const endpoint = currentlyActive ? "deactivate" : "reactivate";
+    
+    if (!window.confirm(`Are you sure you want to ${action} ${studentName}?`))
+      return;
+
+    try {
+      setIsDeactivating(id);
+      const res = await fetch(`${API_BASE_URL}/${id}/${endpoint}`, { method: "PATCH" });
+      const result = await res.json();
+      if (result.success) {
+        // Update the student in the list
+        setStudents((current) =>
+          current.map((s) =>
+            s.id === id ? { ...s, is_active: !currentlyActive } : s
+          )
+        );
+      } else {
+        alert(result.message || `Failed to ${action} student`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`Error ${action}ing student`);
+    } finally {
+      setIsDeactivating(null);
     }
   };
 
@@ -178,6 +210,11 @@ const Students = ({ isDarkMode }) => {
                       <h3 className="text-xl font-bold truncate">
                         {student.full_name}
                       </h3>
+                      {!student.is_active && (
+                        <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">
+                          Deactivated
+                        </span>
+                      )}
                       <button
                         onClick={() => fetchStudentDetails(student.id)}
                         className="p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors text-blue-600 dark:text-blue-400"
@@ -194,7 +231,23 @@ const Students = ({ isDarkMode }) => {
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => handleToggleActivation(student.id, student.is_active)}
+                    disabled={isDeactivating === student.id}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                      isDeactivating === student.id
+                        ? "bg-gray-300 text-gray-800 cursor-not-allowed"
+                        : student.is_active
+                        ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                    }`}
+                  >
+                    {isDeactivating === student.id 
+                      ? (student.is_active ? "Deactivating..." : "Reactivating...") 
+                      : (student.is_active ? "Deactivate" : "Reactivate")
+                    }
+                  </button>
                   <button
                     onClick={() => handleDelete(student.id)}
                     disabled={isDeleting === student.id}
@@ -284,6 +337,12 @@ const Students = ({ isDarkMode }) => {
                           <p className="text-sm text-gray-500 dark:text-gray-400">Profile Status</p>
                           <p className={`font-semibold ${studentDetails.profile.profile_completed ? "text-green-500" : "text-yellow-500"}`}>
                             {studentDetails.profile.profile_completed ? "Completed" : "Incomplete"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Account Status</p>
+                          <p className={`font-semibold ${studentDetails.profile.is_active ? "text-green-500" : "text-red-500"}`}>
+                            {studentDetails.profile.is_active ? "Active" : "Deactivated"}
                           </p>
                         </div>
                         {studentDetails.profile.linkedin_url && (

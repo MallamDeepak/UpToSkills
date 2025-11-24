@@ -127,7 +127,12 @@ export default function useRealtimeNotifications({
     socket.on("notifications:bulk-read", handleBulkRead);
 
     socket.on("connect_error", (err) => {
-      setError(err);
+      console.warn("Socket.IO connection error:", err.message);
+      // Only set error for non-connection issues in production
+      if (process.env.NODE_ENV === 'production') {
+        setError(err);
+      }
+      // In development, just log the error without showing it to user
     });
 
     return () => {

@@ -230,7 +230,7 @@ const Webdev = () => {
                               className="peer w-full border-2 border-gray-200 rounded-xl px-4 pt-5 pb-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                             />
                             <label className="absolute text-sm left-4 text-gray-500 peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600 transition-all duration-200 ease-in-out">
-                              Full Name
+                              Username
                             </label>
                           </div>
 

@@ -96,10 +96,19 @@ const { ensureNotificationsTable } = require('../utils/ensureNotificationsTable'
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
-    // await pool.query(`
-    //   Alter TABLE students
-    //   ADD COLUMN IF NOT EXISTS username VARCHAR(50);
-    // `);
+
+    // Ensure new columns exist for deactivation support
+    await pool.query(`
+      ALTER TABLE students
+      ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true NOT NULL;
+    `);
+    await pool.query(`
+      ALTER TABLE students
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_students_is_active ON students(is_active);
+    `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_details (
         id SERIAL PRIMARY KEY,

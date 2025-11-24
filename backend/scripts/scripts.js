@@ -10,8 +10,8 @@ const pool = require('../config/database');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS companies (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(50),
         company_name VARCHAR(255) NOT NULL,
+        username VARCHAR(50) UNIQUE,  -- ✅ Added UNIQUE
         email VARCHAR(255) UNIQUE NOT NULL,
         phone VARCHAR(15) NOT NULL,
         password TEXT NOT NULL,
@@ -36,17 +36,17 @@ const pool = require('../config/database');
       );
     `);
 
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS mentors (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50),
-        full_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        phone VARCHAR(15) NOT NULL,
-        password TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `);
+   await pool.query(`
+    CREATE TABLE IF NOT EXISTS mentors (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE,  -- ✅ Added UNIQUE
+      full_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      phone VARCHAR(15) NOT NULL,
+      password TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
     // await pool.query(`
     //   Alter TABLE mentors
     //   ADD COLUMN IF NOT EXISTS username VARCHAR(50);
@@ -85,7 +85,7 @@ const pool = require('../config/database');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS students (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(50),
+        username VARCHAR(50) UNIQUE,  -- ✅ Added UNIQUE constraint
         program_id INTEGER REFERENCES programs(id),
         full_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -94,10 +94,19 @@ const pool = require('../config/database');
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
-    // await pool.query(`
-    //   Alter TABLE students
-    //   ADD COLUMN IF NOT EXISTS username VARCHAR(50);
-    // `);
+
+    // Ensure new columns exist for deactivation support
+    await pool.query(`
+      ALTER TABLE students
+      ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true NOT NULL;
+    `);
+    await pool.query(`
+      ALTER TABLE students
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_students_is_active ON students(is_active);
+    `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_details (
         id SERIAL PRIMARY KEY,
@@ -172,6 +181,66 @@ const pool = require('../config/database');
       );
     `);
 
+    // Create courses table first (from coursesController logic)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS courses (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        image_path VARCHAR(255),
+        enrolled integer[],
+        skills TEXT[],
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
+      ALTER TABLE courses ADD COLUMN IF NOT EXISTS enroll_url TEXT;
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS enrollments (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+        course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+        enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+        status VARCHAR(20) DEFAULT 'active',
+        UNIQUE(student_id, course_id)
+      );
+    `);
+
+    // Create indexes for better query performance
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_enrollments_status ON enrollments(status);
+    `);
+
+    // Create notifications table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        role VARCHAR(20) NOT NULL CHECK (role IN ('student','mentor','admin','company')),
+        recipient_id INTEGER,
+        notification_type VARCHAR(50) NOT NULL DEFAULT 'general',
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        link TEXT,
+        metadata JSONB DEFAULT '{}'::jsonb,
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_notifications_role ON notifications(role);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_notifications_recipient_role ON notifications(role, recipient_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(notification_type);`);
 
     console.log('✅ All tables checked/created successfully');
   } catch (err) {

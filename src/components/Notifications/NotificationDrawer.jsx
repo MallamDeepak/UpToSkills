@@ -162,9 +162,11 @@ const NotificationDrawer = ({
                 )}
               </header>
 
-              {error && (
-                <div className="border-b border-red-200 bg-red-50 px-6 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
-                  {error.message || "Something went wrong while loading notifications."}
+              {error && error.message && !error.message.includes('websocket') && (
+                <div className="border-b border-yellow-200 bg-yellow-50 px-6 py-3 text-sm text-yellow-700 dark:border-yellow-500/30 dark:bg-yellow-500/10 dark:text-yellow-200">
+                  <strong>Note:</strong> {error.message.includes('Failed to load') 
+                    ? 'Unable to fetch notifications. Please check your connection.'
+                    : error.message || "Something went wrong while loading notifications."}
                 </div>
               )}
 

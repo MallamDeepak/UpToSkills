@@ -78,6 +78,7 @@ const coursesRoutes = require('./routes/courses.route');
 const interviewRoutes = require('./routes/interviews');
 const notificationRoutes = require('./routes/notifications');
 const adminNotificationRoutes = require('./routes/adminNotifications');
+const enrollmentRoutes = require('./routes/enrollmentRoutes');
 
 // Middleware setup
 app.use(cors({
@@ -108,6 +109,7 @@ app.use('/api/courses', coursesRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin/notifications', adminNotificationRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
 
 // ✅ FIXED: Mount the companies route
 app.use('/api/companies', companiesRouter);
